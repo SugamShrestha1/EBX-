@@ -1,0 +1,33 @@
+export const useTheme = (themeMode) => {
+  const isDark = themeMode === "dark";
+  return {
+    isDark,
+    card:      isDark ? "border-slate-800 bg-[#090d16]/50"   : "border-slate-200 bg-white",
+    cardHover: isDark ? "hover:border-slate-700"              : "hover:border-slate-300 hover:shadow-md",
+    cardStat:  isDark ? "border-slate-800 bg-[#090d16]/70 backdrop-blur-sm" : "border-slate-200 bg-white",
+    th:        isDark ? "text-slate-500"                      : "text-slate-500",
+    tdPrimary: isDark ? "text-slate-200"                      : "text-slate-800",
+    tdSub:     isDark ? "text-slate-400"                      : "text-slate-600",
+    tdMono:    isDark ? "text-slate-500"                      : "text-slate-500",
+    divRow:    isDark ? "divide-slate-800/40"                 : "divide-slate-100",
+    rowHover:  isDark ? "hover:bg-slate-850/10"               : "hover:bg-slate-50",
+    label:     isDark ? "text-slate-500"                      : "text-slate-500",
+    heading:   isDark ? "text-white"                          : "text-slate-800",
+    subHead:   isDark ? "text-slate-500"                      : "text-slate-500",
+    sectionLabel: isDark ? "text-slate-400"                   : "text-slate-500",
+    border:    isDark ? "border-slate-850"                    : "border-slate-100",
+    statLabel: isDark ? "text-slate-500"                      : "text-slate-500",
+    statVal:   isDark ? "text-white"                          : "text-slate-800",
+    progressBg:isDark ? "bg-slate-800"                        : "bg-slate-100",
+    nodeRow:   isDark ? "bg-slate-850/20 border-slate-800/60" : "bg-slate-50 border-slate-200",
+    nodeText:  isDark ? "text-slate-200"                      : "text-slate-700",
+    btnOutline:isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-300" : "bg-slate-100 hover:bg-slate-200 text-slate-600",
+    btnIcon:   isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800",
+    btnDanger: isDark ? "bg-slate-800/50 hover:bg-rose-950/30 text-slate-500 hover:text-rose-400" : "bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-500",
+    ivrNode:   isDark ? "bg-slate-850/20 border-slate-800 hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300",
+    ivrNumBg:  { 1: isDark ? "bg-indigo-500/10 text-brand-primary"  : "bg-brand-primary/10 text-brand-primary",
+                 2: isDark ? "bg-cyan-500/10 text-brand-secondary"   : "bg-brand-secondary/10 text-brand-secondary",
+                 3: isDark ? "bg-purple-500/10 text-brand-accent"    : "bg-brand-accent/10 text-brand-accent" },
+    pageDesc:  isDark ? "text-slate-400" : "text-slate-600",
+  };
+};

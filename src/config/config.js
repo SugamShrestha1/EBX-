@@ -1,0 +1,5 @@
+const config = {
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.115:8000',
+};
+
+export default config;
