@@ -1,19 +1,31 @@
 import { useApi } from './useApi';
 import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { requestApi } from '../utils/request';
+import { APIAuthHeaders2 } from '../API';
+import endpoints from '../constants/APIEndpoinits';
 
-export const useDashboardApi = () => {
-  const { get } = useApi();
 
-  const getDashboardStats = useCallback(async () => {
-    return await get('/dashboard/stats');
-  }, [get]);
-
-  const getRecentActivities = useCallback(async () => {
-    return await get('/dashboard/activities');
-  }, [get]);
-
-  return {
-    getDashboardStats,
-    getRecentActivities
-  };
+export const useUserData = () => {
+  return useQuery({
+    queryKey: ["users_list"],
+    queryFn: () => {
+      return requestApi(`${endpoints.users}`, {
+        method: "GET",
+        headers: APIAuthHeaders2(),
+      });
+    }
+  });
 };
+
+export const useGetMenus = () => {
+  return useQuery({
+    queryKey: ["menus_list"],
+    queryFn: () => {
+      return requestApi(`${endpoints.menus}`, {
+        method: "GET",
+        headers: APIAuthHeaders2(),
+      });
+    }
+  });
+}

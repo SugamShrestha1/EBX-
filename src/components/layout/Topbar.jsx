@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { 
+import { useNavigate } from "react-router-dom";
+import {
   Bell, 
   Search, 
   HelpCircle, 
@@ -12,6 +13,7 @@ import {
   Sun,
   Moon
 } from "lucide-react";
+import { useLogout } from "../../hooks/useAuthApi";
 
 /**
  * Topbar component — fully light/dark theme-aware via themeMode prop.
@@ -26,9 +28,11 @@ export const Topbar = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
-  
+
   const notificationsRef = useRef(null);
   const profileRef = useRef(null);
+  const navigate = useNavigate();
+  const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
   const isDark = themeMode === "dark";
 
@@ -237,9 +241,13 @@ export const Topbar = ({
               </div>
 
               <div className={`border-t pt-2 pb-1 ${t.dropHead}`}>
-                <button className="flex items-center gap-3 w-full rounded-xl px-3.5 py-2.5 text-xs text-rose-500 hover:bg-rose-50 transition-all font-semibold">
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
+                <button
+                  onClick={() => logout(undefined, { onSettled: () => navigate('/login') })}
+                  disabled={isLoggingOut}
+                  className="flex items-center gap-3 w-full rounded-xl px-3.5 py-2.5 text-xs text-rose-500 hover:bg-rose-50 transition-all font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <LogOut className={`w-4 h-4 ${isLoggingOut ? 'animate-spin' : ''}`} />
+                  <span>{isLoggingOut ? 'Signing out...' : 'Sign Out'}</span>
                 </button>
               </div>
             </div>

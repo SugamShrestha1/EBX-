@@ -16,6 +16,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
+import { useUserData } from '../hooks/useDashboardApi';
 
 const data = [
   { time: '00h', calls: 20 },
@@ -35,6 +36,8 @@ const liveCalls = [
 ];
 
 export const Dashboard = ({ isDark = true }) => {
+  const { data: usersData, isLoading: isUsersLoading } = useUserData();
+  console.log(usersData, 'data')
   return (
     <div className={`flex-1 p-6 space-y-6 ${isDark ? 'text-slate-100 bg-[#06090f]' : 'text-slate-800 bg-slate-50'} overflow-y-auto h-full`}>
       {/* Header */}
@@ -76,8 +79,8 @@ export const Dashboard = ({ isDark = true }) => {
 
         {/* Online Agents Card */}
         <div className={`${isDark ? 'bg-slate-900/50 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'} backdrop-blur-xl border rounded-2xl p-5 relative overflow-hidden group transition-colors`}>
-           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all"></div>
-           <div className="flex justify-between items-start mb-4">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all"></div>
+          <div className="flex justify-between items-start mb-4">
             <div className={`flex items-center gap-2 font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
               <Headset className="w-5 h-5 text-cyan-400" />
               Online Agents
@@ -87,7 +90,7 @@ export const Dashboard = ({ isDark = true }) => {
             <span className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>94</span>
             <span className="text-xl text-slate-500 font-medium mb-1">/110</span>
           </div>
-          
+
           <div className={`w-full h-1.5 rounded-full mt-4 overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`}>
             <div className="h-full bg-gradient-to-r from-cyan-500 to-indigo-500 w-[85%] rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)]"></div>
           </div>
@@ -132,14 +135,14 @@ export const Dashboard = ({ isDark = true }) => {
             <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorCalls" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#e2e8f0"} vertical={false} />
               <XAxis dataKey="time" stroke={isDark ? "#475569" : "#94a3b8"} fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke={isDark ? "#475569" : "#94a3b8"} fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{ backgroundColor: isDark ? '#0f172a' : '#ffffff', border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0', borderRadius: '0.5rem', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
                 itemStyle={{ color: isDark ? '#e2e8f0' : '#0f172a' }}
               />
@@ -175,19 +178,16 @@ export const Dashboard = ({ isDark = true }) => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <span className="relative flex h-2.5 w-2.5">
-                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                          call.status === 'Active' ? 'bg-emerald-400' :
+                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${call.status === 'Active' ? 'bg-emerald-400' :
                           call.status === 'On Hold' ? 'bg-amber-400' : 'bg-cyan-400'
-                        }`}></span>
-                        <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
-                          call.status === 'Active' ? 'bg-emerald-500' :
+                          }`}></span>
+                        <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${call.status === 'Active' ? 'bg-emerald-500' :
                           call.status === 'On Hold' ? 'bg-amber-500' : 'bg-cyan-500'
-                        }`}></span>
+                          }`}></span>
                       </span>
-                      <span className={`text-xs font-medium ${
-                         call.status === 'Active' ? 'text-emerald-500' :
-                         call.status === 'On Hold' ? 'text-amber-500' : 'text-cyan-500'
-                      }`}>{call.status}</span>
+                      <span className={`text-xs font-medium ${call.status === 'Active' ? 'text-emerald-500' :
+                        call.status === 'On Hold' ? 'text-amber-500' : 'text-cyan-500'
+                        }`}>{call.status}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right font-mono">{call.duration}</td>

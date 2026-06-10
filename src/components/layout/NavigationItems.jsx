@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useGetMenus } from "../../hooks/useDashboardApi";
 import {
   LayoutDashboard,
   Headset,
@@ -18,170 +19,34 @@ import {
   Ban,
   Voicemail,
   ChevronDown,
+  Menu,
 } from "lucide-react";
 
-export const navigationData = [
-  {
-    id: "dashboard",
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    badge: null,
-  },
-  {
-    id: "agent",
-    title: "Agent",
-    icon: Headset,
-    subItems: [
-      { id: "statuses", title: "Agent Statuses" },
-      { id: "agents", title: "Agents" },
-    ],
-  },
-  {
-    id: "asterisk",
-    title: "Asterisk",
-    icon: Server,
-    subItems: [
-      { id: "deployment-logs", title: "Deployment logs" },
-      { id: "feature-codes", title: "Feature Codes" },
-    ],
-  },
-  {
-    id: "audit",
-    title: "Audit",
-    icon: ClipboardList,
-    subItems: [
-      { id: "activity-logs", title: "Activity Logs" },
-    ],
-  },
-  {
-    id: "calls",
-    title: "Calls",
-    icon: PhoneCall,
-    subItems: [
-      { id: "detail-records", title: "Call detail records" },
-      { id: "dispositions-calls", title: "Call dispositions" },
-      { id: "recordings", title: "Call recordings" },
-      { id: "channel-event-logs", title: "Channel event logs" },
-      { id: "dispositions", title: "Dispositions" },
-      { id: "live-calls", title: "Live calls" },
-    ],
-  },
-  {
-    id: "celery-results",
-    title: "Celery Results",
-    icon: Activity,
-    subItems: [
-      { id: "group-results", title: "Group results" },
-      { id: "task-results", title: "Task results" },
-    ],
-  },
-  {
-    id: "conference-and-monitor",
-    title: "Conference & Monitor",
-    icon: Monitor,
-    subItems: [
-      { id: "conference-rooms", title: "Conference Rooms" },
-      { id: "monitor-sessions", title: "Monitor Sessions" },
-    ],
-  },
-  {
-    id: "dialer",
-    title: "Dialer",
-    icon: PhoneOutgoing,
-    subItems: [
-      { id: "callbacks", title: "Callbacks" },
-      { id: "campaign-contacts", title: "Campaign Contacts" },
-      { id: "outbound-campaigns", title: "Outbound Campaigns" },
-    ],
-  },
-  {
-    id: "identity",
-    title: "Identity",
-    icon: Shield,
-    subItems: [
-      { id: "departments", title: "Departments" },
-      { id: "users", title: "Users" },
-    ],
-  },
-  {
-    id: "ivr",
-    title: "IVR",
-    icon: Network,
-    subItems: [
-      { id: "flows", title: "IVR Flows" },
-      { id: "nodes", title: "IVR Nodes" },
-      { id: "prompts", title: "IVR Prompts" },
-      { id: "session-logs", title: "IVR Session Logs" },
-      { id: "transitions", title: "IVR Transitions" },
-    ],
-  },
-  {
-    id: "queues",
-    title: "Queues",
-    icon: Users,
-    subItems: [
-      { id: "members", title: "Queue Members" },
-      { id: "states", title: "Queue states" },
-      { id: "list", title: "Queues" },
-    ],
-  },
-  {
-    id: "reporting",
-    title: "Reporting",
-    icon: BarChart,
-    subItems: [
-      { id: "agent-performance", title: "Agent Performance Rep..." },
-      { id: "hourly-cdr", title: "Hourly CDR Aggregates" },
-      { id: "missed-call", title: "Missed Call Reports" },
-      { id: "queue-performance", title: "Queue Performance Re..." },
-    ],
-  },
-  {
-    id: "routing",
-    title: "Routing",
-    icon: Route,
-    subItems: [
-      { id: "holidays", title: "Holidays" },
-      { id: "inbound", title: "Inbound Routes" },
-      { id: "outbound", title: "Outbound Routes" },
-      { id: "ring-groups", title: "Ring Groups" },
-      { id: "time-conditions", title: "Time Conditions" },
-    ],
-  },
-  {
-    id: "telephony",
-    title: "Telephony",
-    icon: Radio,
-    subItems: [
-      { id: "did-numbers", title: "DID Numbers" },
-      { id: "devices", title: "Devices" },
-      { id: "emergency-numbers", title: "Emergency Numbers" },
-      { id: "extensions", title: "Extensions" },
-      { id: "music-on-hold", title: "Music On Hold Classes" },
-      { id: "parking-lots", title: "Parking Lots" },
-      { id: "transport-bindings", title: "Transport Bindings" },
-      { id: "trunks", title: "Trunks" },
-    ],
-  },
-  {
-    id: "token-blacklist",
-    title: "Token Blacklist",
-    icon: Ban,
-    subItems: [
-      { id: "blacklisted-tokens", title: "Blacklisted Tokens" },
-      { id: "outstanding-tokens", title: "Outstanding Tokens" },
-    ],
-  },
-  {
-    id: "voicemail",
-    title: "Voicemail",
-    icon: Voicemail,
-    subItems: [
-      { id: "boxes", title: "Voicemail Boxes" },
-      { id: "messages", title: "Voicemail Messages" },
-    ],
-  },
-];
+// Icon map — maps icon name string (from data) to lucide component.
+// When menus come from the API, add new icons here.
+const ICON_MAP = {
+  LayoutDashboard,
+  Headset,
+  Server,
+  ClipboardList,
+  PhoneCall,
+  Activity,
+  Monitor,
+  PhoneOutgoing,
+  Shield,
+  Network,
+  Users,
+  BarChart,
+  Route,
+  Radio,
+  Ban,
+  Voicemail,
+  Menu,
+};
+
+// ─── Dummy data (replace with API call in future) ───────────────────────────
+import { navigationMenuData } from "../../data/navigationMenuData";
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const NavigationItems = ({
   isOpen,
@@ -193,7 +58,9 @@ export const NavigationItems = ({
 }) => {
   const [expandedMenus, setExpandedMenus] = useState({});
   const navigate = useNavigate();
+  const { data } = useGetMenus();
 
+  console.log(data, "333")
   const toggleSubMenu = (menuId) => {
     setExpandedMenus((prev) => ({
       ...prev,
@@ -216,10 +83,25 @@ export const NavigationItems = ({
     setIsMobileOpen(false);
   };
 
+  const menusToRender = data?.data?.menu_items || [];
+
   return (
     <>
-      {navigationData.map((item) => {
-        const Icon = item.icon;
+      {menusToRender.map((apiItem) => {
+        // Transform the API data into the shape expected by the UI
+        const item = {
+          id: apiItem.slug,
+          title: apiItem.name,
+          icon: apiItem.icon 
+            ? apiItem.icon.replace(/^lucide-/, '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('') 
+            : '',
+          badge: apiItem.badge_text || null,
+          subItems: apiItem.children && apiItem.children.length > 0 
+            ? apiItem.children.map(child => ({ id: child.slug, title: child.name }))
+            : null
+        };
+
+        const Icon = ICON_MAP[item.icon] ?? LayoutDashboard; // fallback icon
         const isSelected =
           activeTab === item.id || activeTab.startsWith(item.id + "-");
         const isExpanded = expandedMenus[item.id];
@@ -239,9 +121,8 @@ export const NavigationItems = ({
               )}
 
               <Icon
-                className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${
-                  isSelected ? t.iconActive : "group-hover:scale-110"
-                }`}
+                className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isSelected ? t.iconActive : "group-hover:scale-110"
+                  }`}
               />
 
               {isOpen && (
@@ -254,11 +135,10 @@ export const NavigationItems = ({
                 <span
                   className={`
                   ml-auto px-2 py-0.5 text-[9px] font-bold rounded-full
-                  ${
-                    item.badge === "New"
+                  ${item.badge === "New"
                       ? "bg-brand-secondary/20 text-brand-secondary border border-brand-secondary/30"
                       : t.badgeBg
-                  }
+                    }
                 `}
                 >
                   {item.badge}
@@ -267,11 +147,9 @@ export const NavigationItems = ({
 
               {isOpen && item.subItems && (
                 <ChevronDown
-                  className={`w-3.5 h-3.5 ml-auto ${
-                    t.chevron
-                  } transition-transform duration-200 ${
-                    isExpanded ? "rotate-180" : ""
-                  }`}
+                  className={`w-3.5 h-3.5 ml-auto ${t.chevron
+                    } transition-transform duration-200 ${isExpanded ? "rotate-180" : ""
+                    }`}
                 />
               )}
 
@@ -303,16 +181,15 @@ export const NavigationItems = ({
                         className={`
                           flex items-center w-full rounded-lg px-4 py-2 text-[11px] font-medium transition-all duration-150
                           ${isSubSelected ? t.subActive : t.subText}
-                          ${isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}
+                          ${isDark ? "hover:bg-slate-800" : "hover:bg-slate-100"}
                         `}
                       >
                         <span
                           className={`
                             w-1.5 h-1.5 rounded-full mr-2.5 transition-all
-                            ${
-                              isSubSelected
-                                ? "bg-brand-secondary scale-125"
-                                : isDark
+                            ${isSubSelected
+                              ? "bg-brand-secondary scale-125"
+                              : isDark
                                 ? "bg-slate-600"
                                 : "bg-slate-300"
                             }

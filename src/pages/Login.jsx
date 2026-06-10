@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, User, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { useLogin } from '../hooks/useAuthApi';
+import { useSessionStore } from './session/useSessionStore';
 
 export const Login = () => {
   const [username, setUsername] = useState('');
@@ -9,15 +10,30 @@ export const Login = () => {
   const navigate = useNavigate();
   const { mutate: login, isPending, error } = useLogin();
 
+  const { setSession } = useSessionStore();
+
   const handleLogin = (e) => {
     e.preventDefault();
     login(
       { username, password },
       {
         onSuccess: (response) => {
-          if (response?.token) {
-            localStorage.setItem('token', response.token);
+          const access = response?.data?.access;
+          const refresh = response?.data?.refresh;
+
+          if (access) {
+            localStorage.setItem('token', access);
           }
+          if (refresh) {
+            localStorage.setItem('refresh_token', refresh);
+          }
+
+          // Persist both tokens in the Zustand session store
+          setSession({
+            access: access ?? null,
+            refresh: refresh ?? null,
+          });
+
           navigate('/dashboard');
         },
       }
