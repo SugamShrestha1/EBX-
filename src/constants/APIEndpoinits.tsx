@@ -15,9 +15,14 @@ const endpoints = {
     announcement: `${BASE_URL}/api/v1/announcements`,
     ivr: `${BASE_URL}/api/v1/ivrs`,
     trunk: `${BASE_URL}/api/v1/trunks`,
-    queue: `${BASE_URL}/api/v1/queues`,
-    music_on_hold: `${BASE_URL}/api/v1/music-on-hold`,
-    routes: `${BASE_URL}/api/v1/routes`,
+    departments: `${BASE_URL}/api/v1/departments/`,
+    departmentById: (id: string | number) => `${BASE_URL}/api/v1/departments/${id}/`,
+    departmentBulkDelete: `${BASE_URL}/api/v1/departments/bulk-delete/`,
+    departmentToggle: (id: string | number) => `${BASE_URL}/api/v1/departments/${id}/toggle/`,
+    departmentSimple: `${BASE_URL}/api/v1/departments/simple/`,
+    queue: `${BASE_URL}/api/v1/queues/`,
+    music_on_hold: `${BASE_URL}/api/v1/music-on-hold/`,
+    routes: `${BASE_URL}/api/v1/routes/`,
     menus: `${BASE_URL}/api/v1/menu-items/navigation/`,
 };
 

@@ -37,7 +37,7 @@ const liveCalls = [
 
 export const Dashboard = ({ isDark = true }) => {
   const { data: usersData, isLoading: isUsersLoading } = useUserData();
-  console.log(usersData, 'data')
+  console.log(usersData, 'datada')
   return (
     <div className={`flex-1 p-6 space-y-6 ${isDark ? 'text-slate-100 bg-[#06090f]' : 'text-slate-800 bg-slate-50'} overflow-y-auto h-full`}>
       {/* Header */}

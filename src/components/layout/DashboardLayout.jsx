@@ -44,7 +44,7 @@ export const DashboardLayout = () => {
         />
 
         <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]">
+          <div className="w-full mx-auto animate-[fadeIn_0.3s_ease-out]">
             <Outlet />
           </div>
         </main>

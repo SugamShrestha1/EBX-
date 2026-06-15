@@ -79,7 +79,7 @@ export const NavigationItems = ({
   };
 
   const handleSubItemClick = (parentItem, subItem) => {
-    navigate(`/${parentItem.id}-${subItem.id}`);
+    navigate(`/${parentItem.id}/${subItem.id}`);
     setIsMobileOpen(false);
   };
 
@@ -103,7 +103,7 @@ export const NavigationItems = ({
 
         const Icon = ICON_MAP[item.icon] ?? LayoutDashboard; // fallback icon
         const isSelected =
-          activeTab === item.id || activeTab.startsWith(item.id + "-");
+          activeTab === item.id || activeTab.startsWith(item.id + "/");
         const isExpanded = expandedMenus[item.id];
 
         return (
@@ -173,7 +173,7 @@ export const NavigationItems = ({
               >
                 <div className="flex flex-col space-y-1">
                   {item.subItems.map((sub) => {
-                    const isSubSelected = activeTab === `${item.id}-${sub.id}`;
+                    const isSubSelected = activeTab === `${item.id}/${sub.id}`;
                     return (
                       <button
                         key={sub.id}

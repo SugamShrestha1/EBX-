@@ -38,6 +38,8 @@ import {
     useBulkDeleteUsers,
     useToggleUser,
 } from '../../hooks/useUserApi';
+import { useUsersStore } from './useUserStore';
+import { Select } from 'antd';
 
 const { Title, Text } = Typography;
 const { confirm } = Modal;
@@ -48,6 +50,9 @@ const UserFormModal = ({ open, onClose, editingUser }) => {
     const createUser = useCreateUser();
     const updateUser = useUpdateUser();
     const isEditing = !!editingUser;
+
+    const { departments } = useUsersStore();
+    console.log(departments, "de");
 
     React.useEffect(() => {
         if (open) {
@@ -176,12 +181,15 @@ const UserFormModal = ({ open, onClose, editingUser }) => {
                         <Form.Item
                             label="Department"
                             name="department"
-                            rules={[{ required: true, message: 'Required' }]}
+                            rules={[{ required: true, message: "Required" }]}
                         >
-                            <InputNumber
+                            <Select
                                 className="w-full"
-                                min={0}
-                                placeholder="Department ID"
+                                placeholder="Select Department"
+                                options={departments.map((department) => ({
+                                    label: department.name,          // shown to user
+                                    value: department.reference_id,  // stored in form
+                                }))}
                             />
                         </Form.Item>
                     </Col>
@@ -238,7 +246,7 @@ const UsersList = () => {
         (Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : []);
     const total = data?.data?.count ?? data?.count ?? users.length;
 
-    console.log(data,"www")
+    console.log(data, "www")
 
     // ── Handlers ────────────────────────────────────────────────────────────────
     const openCreate = () => {

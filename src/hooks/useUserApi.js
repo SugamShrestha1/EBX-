@@ -2,35 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import endpoints from '../constants/APIEndpoinits';
 import { useSessionStore } from '../pages/session/useSessionStore';
 import { APIAuthHeaders2 } from '../API';
-
-const fetchApi = async (url, options = {}) => {
-  const { access } = useSessionStore.getState();
-  const token = access || localStorage.getItem('token');
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
-  };
-
-  const response = await fetch(url, { ...options, headers });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-    throw new Error(errorData?.message || `Error: ${response.status} ${response.statusText}`);
-  }
-
-  // Handle 204 No Content
-  if (response.status === 204) {
-    return null;
-  }
-  
-  // Some endpoints might return empty response body even with 200/201, so we try-catch JSON parsing
-  try {
-    return await response.json();
-  } catch (e) {
-    return null;
-  }
-};
+import { requestApi } from '../utils/request';
+import { useUsersStore } from "../pages/Users/useUserStore"
+import { useEffect } from 'react';
 
 // --- Get all users ---
 export const useGetUsers = (params) =>
@@ -38,7 +12,7 @@ export const useGetUsers = (params) =>
     queryKey: ['users', params],
     queryFn: () => {
       const queryString = params ? '?' + new URLSearchParams(params).toString() : '';
-      return fetchApi(`${endpoints.users}${queryString}`);
+      return requestApi(`${endpoints.users}${queryString}`);
     },
   });
 
@@ -46,14 +20,14 @@ export const useGetUsers = (params) =>
 export const useGetSimpleUsers = () =>
   useQuery({
     queryKey: ['users', 'simple'],
-    queryFn: () => fetchApi(`${endpoints.users}simple/`),
+    queryFn: () => requestApi(`${endpoints.users}simple/`),
   });
 
 // --- Get single user by ID ---
 export const useGetUserById = (id) =>
   useQuery({
     queryKey: ['users', id],
-    queryFn: () => fetchApi(endpoints.userById(id)),
+    queryFn: () => requestApi(endpoints.userById(id)),
     enabled: !!id,
   });
 
@@ -62,7 +36,7 @@ export const useCreateUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data) =>
-      fetchApi(endpoints.users, { method: 'POST', headers:APIAuthHeaders2(),body: JSON.stringify(data) }),
+      requestApi(endpoints.users, { method: 'POST', headers: APIAuthHeaders2(), body: JSON.stringify(data) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   });
 };
@@ -72,7 +46,11 @@ export const useUpdateUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }) =>
-      fetchApi(endpoints.userById(id), { method: 'PATCH', body: JSON.stringify(data) }),
+      requestApi(endpoints.userById(id), {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+        headers: APIAuthHeaders2(),
+      }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   });
 };
@@ -82,7 +60,10 @@ export const useDeleteUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id) =>
-      fetchApi(endpoints.userById(id), { method: 'DELETE' }),
+      requestApi(endpoints.userById(id), {
+        method: 'DELETE',
+        headers: APIAuthHeaders2(),
+      }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   });
 };
@@ -92,9 +73,10 @@ export const useBulkDeleteUsers = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ids) =>
-      fetchApi(endpoints.userBulkDelete, {
+      requestApi(endpoints.userBulkDelete, {
         method: 'POST',
         body: JSON.stringify({ ids }),
+        headers: APIAuthHeaders2(),
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   });
@@ -105,10 +87,129 @@ export const useToggleUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, field }) =>
-      fetchApi(endpoints.userToggle(id), {
+      requestApi(endpoints.userToggle(id), {
         method: 'PATCH',
         body: JSON.stringify({ field }),
+        headers: APIAuthHeaders2(),
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+  });
+};
+
+// --- Create department ---
+export const useCreateDepartment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) =>
+      requestApi(endpoints.departments, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: APIAuthHeaders2(),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['departments'] }),
+  });
+};
+
+// --- Get all departments ---
+export const useGetDepartments = (params) => {
+  const { setDepartments } = useUsersStore();
+
+  const query = useQuery({
+    queryKey: ['departments', params],
+    queryFn: () => {
+      const queryString = params
+        ? '?' + new URLSearchParams(params).toString()
+        : '';
+
+      return requestApi(`${endpoints.departments}${queryString}`);
+    },
+  });
+
+  const { data, isSuccess } = query;
+
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    console.log(data, 'data from useGetDepartments');
+
+    if (data?.data) {
+      setDepartments(data.data);
+    } else if (Array.isArray(data)) {
+      setDepartments(data);
+    } else if (data?.results) {
+      setDepartments(data.results);
+    }
+  }, [isSuccess, data, setDepartments]);
+
+  return query;
+};
+// --- Get simple departments (e.g. for dropdowns) ---
+export const useGetSimpleDepartments = () =>
+  useQuery({
+    queryKey: ['departments', 'simple'],
+    queryFn: () => requestApi(endpoints.departmentSimple),
+  });
+
+
+// --- Get single department by ID ---
+export const useGetDepartmentById = (id) =>
+  useQuery({
+    queryKey: ['departments', id],
+    queryFn: () => requestApi(endpoints.departmentById(id)),
+    enabled: !!id,
+  });
+
+// --- Update department (Partial Update) ---
+export const useUpdateDepartment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) =>
+      requestApi(endpoints.departmentById(id), {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+        headers: APIAuthHeaders2(),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['departments'] }),
+  });
+};
+
+// --- Delete single department ---
+export const useDeleteDepartment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) =>
+      requestApi(endpoints.departmentById(id), {
+        method: 'DELETE',
+        headers: APIAuthHeaders2(),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['departments'] }),
+  });
+};
+
+// --- Bulk delete departments ---
+export const useBulkDeleteDepartments = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids) =>
+      requestApi(endpoints.departmentBulkDelete, {
+        method: 'POST',
+        body: JSON.stringify({ ids }),
+        headers: APIAuthHeaders2(),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['departments'] }),
+  });
+};
+
+// --- Toggle department field (e.g. is_active) ---
+export const useToggleDepartment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, field }) =>
+      requestApi(endpoints.departmentToggle(id), {
+        method: 'PATCH',
+        body: JSON.stringify({ field }),
+        headers: APIAuthHeaders2(),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['departments'] }),
   });
 };

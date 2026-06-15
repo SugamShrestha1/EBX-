@@ -14,6 +14,8 @@ import { Dashboard } from './pages/Dashboard';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
 import { UserRoutes } from './routes/UserRoute';
+import ProtectedRoute from './routes/PrivateRoute';
+import MainRoutes from './routes/MainRoutes';
 
 function App() {
   const { themeMode, isDark } = useThemeMode();
@@ -22,24 +24,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public auth routes */}
+        {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
 
-        {/* Protected app routes with dashboard layout */}
-        <Route element={<DashboardLayout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard isDark={isDark} />} />
-          <Route path="extensions" element={<Extensions t={t} />} />
-          <Route path="announcement" element={<Announcement t={t} />} />
-          <Route path="ivr" element={<IVR t={t} />} />
-          <Route path="trunk" element={<Trunk t={t} />} />
-          <Route path="queue" element={<Queue t={t} />} />
-          <Route path="music-on-hold" element={<MusicOnHold t={t} />} />
-          <Route path="routes" element={<RoutesPage t={t} />} />
-          {UserRoutes}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Route>
+        {/* Delegate everything else to MainRoutes */}
+        <Route path="/*" element={<MainRoutes />} />
       </Routes>
     </BrowserRouter>
   );
