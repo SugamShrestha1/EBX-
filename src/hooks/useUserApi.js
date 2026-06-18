@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import endpoints from '../constants/APIEndpoinits';
+import endpoints from '../constants/APIEndpoints';
 import { useSessionStore } from '../pages/session/useSessionStore';
 import { APIAuthHeaders2 } from '../API';
 import { requestApi } from '../utils/request';
@@ -14,6 +14,12 @@ export const useGetUsers = (params) =>
       const queryString = params ? '?' + new URLSearchParams(params).toString() : '';
       return requestApi(`${endpoints.users}${queryString}`);
     },
+  });
+
+export const useGetSimpleUser = () =>
+  useQuery({
+    queryKey: ['users', 'simple'],
+    queryFn: () => requestApi(`${endpoints.users}simple/`),
   });
 
 // --- Get simple users (e.g. for dropdowns) ---
@@ -87,7 +93,7 @@ export const useToggleUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, field }) =>
-      requestApi(endpoints.userToggle(id), {
+      requestApi(`${endpoints.users}${id}/toggle/`, {
         method: 'PATCH',
         body: JSON.stringify({ field }),
         headers: APIAuthHeaders2(),

@@ -2,22 +2,6 @@ import React from "react";
 import { Table, Space, Button, Tooltip, Popconfirm, Empty, Spin } from "antd";
 import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 
-/**
- * CommonTable Component
- * Reusable table component using Ant Design
- * 
- * @param {Array} columns - Column definitions following antd Table format
- * @param {Array} dataSource - Data to display in table
- * @param {Function} onEdit - Callback when edit button is clicked
- * @param {Function} onDelete - Callback when delete button is clicked
- * @param {Function} onView - Callback when view button is clicked
- * @param {Boolean} loading - Loading state
- * @param {Object} pagination - Pagination config
- * @param {Function} onChange - Callback when table state changes (pagination, sorting, filtering)
- * @param {Boolean} showActions - Show action buttons (default: true)
- * @param {String} actionAlign - Alignment of action column (default: 'center')
- * @param {String} emptyText - Empty state text
- */
 export default function CommonTable({
   columns = [],
   dataSource = [],
@@ -37,7 +21,6 @@ export default function CommonTable({
   scroll = { x: 1200 },
   ...restProps
 }) {
-  // Build action column if callbacks are provided
   const actionColumn = showActions && (onEdit || onDelete || onView) ? {
     title: "Actions",
     key: "actions",
@@ -51,9 +34,8 @@ export default function CommonTable({
             <Button
               type="text"
               size="small"
-              icon={<EyeOutlined />}
+              icon={<EyeOutlined style={{ color: "#8c8c8c" }} />}
               onClick={() => onView(record)}
-              className="text-blue-500 hover:text-blue-700"
             />
           </Tooltip>
         )}
@@ -62,9 +44,8 @@ export default function CommonTable({
             <Button
               type="text"
               size="small"
-              icon={<EditOutlined />}
+              icon={<EditOutlined style={{ color: "#1677ff" }} />}
               onClick={() => onEdit(record)}
-              className="text-green-500 hover:text-green-700"
             />
           </Tooltip>
         )}
@@ -81,8 +62,7 @@ export default function CommonTable({
               <Button
                 type="text"
                 size="small"
-                icon={<DeleteOutlined />}
-                className="text-red-500 hover:text-red-700"
+                icon={<DeleteOutlined style={{ color: "#ff4d4f" }} />}
               />
             </Tooltip>
           </Popconfirm>
@@ -91,10 +71,8 @@ export default function CommonTable({
     ),
   } : null;
 
-  // Combine columns with action column
   const finalColumns = actionColumn ? [...columns, actionColumn] : columns;
 
-  // Default pagination
   const paginationConfig = {
     pageSize: 10,
     showSizeChanger: true,

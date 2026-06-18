@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { requestApi } from '../utils/request';
 import { APIAuthHeaders2 } from '../API';
-import endpoints from '../constants/APIEndpoinits';
+import endpoints from '../constants/APIEndpoints';
 
 
 export const useUserData = () => {

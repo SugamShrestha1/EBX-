@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import endpoints from '../constants/APIEndpoinits';
+import endpoints from '../constants/APIEndpoints';
 import { requestApi } from '../utils/request';
 import { useSessionStore } from '../pages/session/useSessionStore';
 // const fetchApi = async (url, options = {}) => {

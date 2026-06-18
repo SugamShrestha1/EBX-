@@ -18,6 +18,7 @@ import {
     Col,
     Card,
     Checkbox,
+    Switch,
 } from 'antd';
 import {
     PlusOutlined,
@@ -53,6 +54,7 @@ const UserFormModal = ({ open, onClose, editingUser }) => {
 
     const { departments } = useUsersStore();
     console.log(departments, "de");
+    console.log(editingUser, "user")
 
     React.useEffect(() => {
         if (open) {
@@ -65,7 +67,7 @@ const UserFormModal = ({ open, onClose, editingUser }) => {
                         email: editingUser.email,
                         pin: editingUser.pin,
                         profile_picture: editingUser.profile_picture,
-                        department: editingUser.department,
+                        department: editingUser.department.name,
                     }
                     : {}
             );
@@ -227,11 +229,13 @@ const UsersList = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
+    const [statusFilter, setStatusFilter] = useState(null);
 
     const queryParams = {
         page: pagination.current,
         page_size: pagination.pageSize,
         ...(searchText ? { search: searchText } : {}),
+        ...(statusFilter !== null ? { is_active: statusFilter } : {}),
     };
 
     const { data, isLoading, isFetching, refetch } = useGetUsers(queryParams);
@@ -286,7 +290,7 @@ const UsersList = () => {
 
     const handleToggleActive = (user) => {
         toggleUser.mutate(
-            { id: user.id, field: 'is_active' },
+            { id: user.reference_id, field: 'is_active' },
             {
                 onSuccess: () =>
                     message.success(`User ${user.is_active ? 'deactivated' : 'activated'}`),
@@ -311,6 +315,16 @@ const UsersList = () => {
             setSelectedRowKeys((prev) => prev.filter((id) => !pageUserIds.includes(id)));
         } else {
             setSelectedRowKeys((prev) => [...new Set([...prev, ...pageUserIds])]);
+        }
+    };
+
+    const handleTableChange = (newPagination, filters) => {
+        setPagination({ current: newPagination.current, pageSize: newPagination.pageSize });
+
+        if (filters.is_active && filters.is_active.length === 1) {
+            setStatusFilter(filters.is_active[0]);
+        } else {
+            setStatusFilter(null);
         }
     };
 
@@ -385,13 +399,13 @@ const UsersList = () => {
                 { text: 'Active', value: true },
                 { text: 'Inactive', value: false },
             ],
-            onFilter: (value, record) => record.is_active === value,
-            render: (isActive) =>
-                isActive ? (
-                    <Badge status="success" text="Active" />
-                ) : (
-                    <Badge status="default" text="Inactive" />
-                ),
+            render: (isActive, record) => (
+                <Switch
+                    checked={isActive}
+                    onChange={() => handleToggleActive(record)}
+                    loading={toggleUser.isPending && toggleUser.variables?.id === record.reference_id}
+                />
+            ),
         },
         {
             title: 'Actions',
@@ -406,16 +420,6 @@ const UsersList = () => {
                             size="small"
                             icon={<EditOutlined />}
                             onClick={() => openEdit(record)}
-                        />
-                    </Tooltip>
-
-                    <Tooltip title={record.is_active ? 'Deactivate' : 'Activate'}>
-                        <Button
-                            type="text"
-                            size="small"
-                            icon={record.is_active ? <StopOutlined /> : <CheckCircleOutlined />}
-                            onClick={() => handleToggleActive(record)}
-                            loading={toggleUser.isPending && toggleUser.variables?.id === record.id}
                         />
                     </Tooltip>
 
@@ -513,8 +517,8 @@ const UsersList = () => {
                         showSizeChanger: true,
                         pageSizeOptions: ['10', '25', '50', '100'],
                         showTotal: (t, [from, to]) => `${from}–${to} of ${t}`,
-                        onChange: (page, pageSize) => setPagination({ current: page, pageSize }),
                     }}
+                    onChange={handleTableChange}
                     scroll={{ x: 'max-content' }}
                     size="middle"
                 />

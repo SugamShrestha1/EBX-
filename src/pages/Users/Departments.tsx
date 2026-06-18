@@ -15,12 +15,14 @@ import { defaultHours, fromPayload, DAYS } from "./components/BusinessHoursPopov
 import DepartmentFormModal from "./components/DepartmentFormModal";
 
 import { useUsersStore } from "./useUserStore";
+import { useThemeMode } from "../../contexts/ThemeContext";
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const emptyForm = { name: "", code: "", description: "", business_hours: defaultHours() };
 
 export default function DepartmentManager() {
+    const { isDark } = useThemeMode();
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState(emptyForm);
     const [errors, setErrors] = useState({});
@@ -129,12 +131,12 @@ export default function DepartmentManager() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
+        <div className={`min-h-screen font-sans ${isDark ? 'bg-transparent text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
             {/* Header */}
-            <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+            <header className={`border-b px-6 py-4 flex items-center justify-between ${isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'}`}>
                 <div>
-                    <h1 className="text-xl font-semibold text-slate-900 tracking-tight">Departments</h1>
-                    <p className="text-sm text-slate-500 mt-0.5">
+                    <h1 className={`text-xl font-semibold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>Departments</h1>
+                    <p className={`text-sm mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                         {departments.length} department{departments.length !== 1 ? "s" : ""} configured
                     </p>
                 </div>
