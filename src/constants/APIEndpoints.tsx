@@ -26,6 +26,9 @@ const endpoints = {
     routes: `${BASE_URL}/api/v1/routes/`,
     menus: `${BASE_URL}/api/v1/menu-items/navigation/`,
     agent: `${BASE_URL}/api/v1/agents/`,
+    skills: `${BASE_URL}/api/v1/skills/`,
+    campaign: `${BASE_URL}/api/v1/campaigns/`,
+    roles: `${BASE_URL}/api/v1/roles/`,
 };
 
 export default endpoints;

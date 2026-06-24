@@ -1,6 +1,9 @@
 import React from "react";
-import { Table, Space, Button, Tooltip, Popconfirm, Empty, Spin } from "antd";
+import { Table, Space, Button, Tooltip, Popconfirm, Empty, Spin, Typography } from "antd";
 import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
+import useGetAntColumns from "../../hooks/useGetAntColumns";
+
+const { Text } = Typography;
 
 export default function CommonTable({
   columns = [],
@@ -15,10 +18,14 @@ export default function CommonTable({
   actionAlign = "center",
   emptyText = "No data available",
   rowKey = "id",
-  bordered = true,
+  bordered = false,
   stripe = true,
   size = "middle",
   scroll = { x: 1200 },
+  // Row selection / bulk-action props
+  selectedRowKeys,
+  onSelectChange,
+  bulkActions,
   ...restProps
 }) {
   const actionColumn = showActions && (onEdit || onDelete || onView) ? {
@@ -71,7 +78,9 @@ export default function CommonTable({
     ),
   } : null;
 
-  const finalColumns = actionColumn ? [...columns, actionColumn] : columns;
+  const columnsInput = columns && columns.length > 0 ? columns : dataSource;
+  const transformedColumns = useGetAntColumns(columnsInput);
+  const finalColumns = actionColumn ? [...transformedColumns, actionColumn] : transformedColumns;
 
   const paginationConfig = {
     pageSize: 10,
@@ -81,8 +90,38 @@ export default function CommonTable({
     ...pagination,
   };
 
+  // Only wire up rowSelection when the parent opts in via onSelectChange
+  const rowSelection = onSelectChange
+    ? {
+      selectedRowKeys,
+      onChange: onSelectChange,
+      preserveSelectedRowKeys: true,
+    }
+    : undefined;
+
+  const hasBulkBar = rowSelection && selectedRowKeys?.length > 0 && bulkActions;
+
   return (
     <Spin spinning={loading}>
+      {hasBulkBar && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "8px 16px",
+            marginBottom: 8,
+            borderRadius: 8,
+            background: "var(--bulk-bar-bg, rgba(22,119,255,0.08))",
+            border: "1px solid var(--bulk-bar-border, rgba(22,119,255,0.2))",
+          }}
+        >
+          <Text style={{ color: "#1677ff", fontWeight: 500 }}>
+            {selectedRowKeys.length} row{selectedRowKeys.length > 1 ? "s" : ""} selected
+          </Text>
+          <Space>{bulkActions}</Space>
+        </div>
+      )}
       <Table
         columns={finalColumns}
         dataSource={dataSource}
@@ -93,6 +132,7 @@ export default function CommonTable({
         bordered={bordered}
         size={size}
         scroll={scroll}
+        rowSelection={rowSelection}
         locale={{
           emptyText: <Empty description={emptyText} />,
         }}

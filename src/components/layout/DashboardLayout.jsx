@@ -43,8 +43,8 @@ export const DashboardLayout = () => {
           setThemeMode={setThemeMode}
         />
 
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="w-full mx-auto animate-[fadeIn_0.3s_ease-out]">
+        <main className="flex-1 overflow-hidden p-6 md:p-8 flex flex-col">
+          <div className="w-full h-full mx-auto animate-[fadeIn_0.3s_ease-out] flex flex-col">
             <Outlet />
           </div>
         </main>

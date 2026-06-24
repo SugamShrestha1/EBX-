@@ -5,6 +5,8 @@ import CommonTable from '../../components/common/CommonTable';
 import { useGetQueues, useDeleteQueue, useToggleQueueStatus } from '../../hooks/useQueueAction';
 import { useThemeMode } from '../../contexts/ThemeContext';
 import QueueFormModal from './QueueFromModal';
+import { Columns } from './Columns';
+import { useMemo } from 'react';
 
 const { Title, Text } = Typography;
 
@@ -68,90 +70,7 @@ const Queues = () => {
         });
     };
 
-    const strategyColorMap = {
-        'round-robin': 'blue',
-        'least-busy': 'green',
-        'priority': 'orange',
-        'random': 'purple',
-    };
-
-    const columns = [
-        {
-            title: 'Queue Name',
-            dataIndex: 'queue_name',
-            key: 'queue_name',
-            render: (text, record) => (
-                <Space direction="vertical" size={0}>
-                    <Text strong>{record.name || 'Unnamed Queue'}</Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>{record.queue_description}</Text>
-                </Space>
-            ),
-        },
-        {
-            title: 'Queue No.',
-            dataIndex: 'queue_number',
-            key: 'queue_number',
-            render: (text) => <Text code>{text}</Text>,
-        },
-        {
-            title: 'Strategy',
-            dataIndex: 'strategy',
-            key: 'strategy',
-            render: (text) =>
-                text ? (
-                    <Tag color={strategyColorMap[text] || 'default'}>
-                        {text.replace('-', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-                    </Tag>
-                ) : (
-                    <Text type="secondary">—</Text>
-                ),
-        },
-        {
-            title: 'Max Wait (s)',
-            dataIndex: 'max_wait_time',
-            key: 'max_wait_time',
-            render: (text) =>
-                text != null ? <Text>{text}s</Text> : <Text type="secondary">—</Text>,
-        },
-        {
-            title: 'Max Size',
-            dataIndex: 'max_size',
-            key: 'max_size',
-            render: (text) =>
-                text != null ? <Text>{text}</Text> : <Text type="secondary">—</Text>,
-        },
-        {
-            title: 'Members',
-            dataIndex: 'member_count',
-            key: 'member_count',
-            render: (count) => (
-                <Badge
-                    count={count ?? 0}
-                    showZero
-                    style={{ backgroundColor: count > 0 ? '#1677ff' : '#d9d9d9' }}
-                />
-            ),
-        },
-        {
-            title: 'Status',
-            dataIndex: 'is_active',
-            key: 'is_active',
-            filters: [
-                { text: 'Active', value: true },
-                { text: 'Inactive', value: false },
-            ],
-            render: (isActive, record) => (
-                <Switch
-                    checked={isActive}
-                    onChange={() => handleToggleActive(record)}
-                    loading={
-                        toggleQueueStatus.isPending &&
-                        toggleQueueStatus.variables === record.reference_id
-                    }
-                />
-            ),
-        },
-    ];
+    const columns = useMemo(() => Columns({ handleToggleActive, toggleQueueStatus }), [handleToggleActive, toggleQueueStatus.isPending, toggleQueueStatus.variables]);
 
     return (
         <div

@@ -21,29 +21,55 @@ export const renderCellValue = (value) => {
     return value;
 };
 
-const useGetAntColumns = (columns) => {
+const useGetAntColumns = (columnsOrData) => {
     const antColumns = useMemo(() => {
-        if (!columns || !Array.isArray(columns)) return [];
+        if (!columnsOrData || !Array.isArray(columnsOrData) || columnsOrData.length === 0) return [];
         
-        return columns.map((col) => ({
-            ...col,
-            // If header is provided, use it for title
-            title: col.header ? <div style={{ whiteSpace: "nowrap" }}>{col.header}</div> : col.title,
-            // Fallback for antd dataIndex/key requirements
-            dataIndex: col.accessor || col.dataIndex,
-            key: col.accessor || col.key,
-            width: col.width || 150,
-            ellipsis: col.ellipsis !== undefined ? col.ellipsis : true,
-            // If a custom render is provided use it, otherwise provide a fallback generic render
-            render: col.render
-                ? (value, record, index) => col.render(value, record, index)
-                : (value, record) => (
-                    <div style={{ whiteSpace: "nowrap" }}>
-                        {renderCellValue(getNestedValue(record, col.accessor))}
-                    </div>
-                ),
-        }));
-    }, [columns]);
+        // Check if the input is an array of actual data rows instead of column config
+        let rawColumns = columnsOrData;
+        if (typeof columnsOrData[0] === 'object' && columnsOrData[0] !== null &&
+            !('accessor' in columnsOrData[0]) && !('dataIndex' in columnsOrData[0]) && 
+            !('title' in columnsOrData[0]) && !('header' in columnsOrData[0]) && !('render' in columnsOrData[0])) {
+            rawColumns = Object.keys(columnsOrData[0]);
+        }
+
+        return rawColumns.map((col) => {
+            // Support passing just the string key as a column definition
+            if (typeof col === 'string') {
+                return {
+                    title: <div style={{ whiteSpace: "nowrap" }}>{col.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>,
+                    dataIndex: col,
+                    key: col,
+                    width: 150,
+                    ellipsis: true,
+                    render: (value, record) => (
+                        <div style={{ whiteSpace: "nowrap" }}>
+                            {renderCellValue(getNestedValue(record, col))}
+                        </div>
+                    ),
+                };
+            }
+
+            return {
+                ...col,
+                // If header is provided, use it for title
+                title: col.header ? <div style={{ whiteSpace: "nowrap" }}>{col.header}</div> : col.title,
+                // Fallback for antd dataIndex/key requirements
+                dataIndex: col.accessor || col.dataIndex,
+                key: col.accessor || col.key,
+                width: col.width || 150,
+                ellipsis: col.ellipsis !== undefined ? col.ellipsis : true,
+                // If a custom render is provided use it, otherwise provide a fallback generic render
+                render: col.render
+                    ? (value, record, index) => col.render(value, record, index)
+                    : (value, record) => (
+                        <div style={{ whiteSpace: "nowrap" }}>
+                            {renderCellValue(getNestedValue(record, col.accessor || col.dataIndex))}
+                        </div>
+                    ),
+            };
+        });
+    }, [columnsOrData]);
 
     return antColumns;
 };

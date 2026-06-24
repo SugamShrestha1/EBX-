@@ -1,15 +1,14 @@
-import { Modal, Form, InputNumber, Switch, Select, Checkbox, Input } from "antd";
+import { Modal, Form, InputNumber, Switch, Select, Checkbox, Input, message } from "antd";
 import { useEffect } from "react";
-import { useGetQueues, useCreateQueueMember } from "../../hooks/useQueueAction";
+import { useGetQueues, useCreateQueueMember, useUpdateQueueMember } from "../../hooks/useQueueAction";
 import { useGetAgents } from "../../hooks/useAgentAction";
 
-const QueueMemberModal = ({ modalOpen, onCancel, onSubmit, initialValues }) => {
+const QueueMemberModal = ({ modalOpen, onCancel, onSuccess, initialValues }) => {
     const [form] = Form.useForm();
     const { data: queueData, isLoading: queueLoading } = useGetQueues();
     const { data: agentData, isLoading: agentLoading } = useGetAgents();
-    const { mutate: createQueueMember, isLoading: createQueueMemberLoading } = useCreateQueueMember();
-
-    console.log(queueData, "q")
+    const { mutate: createQueueMember, isLoading: createLoading } = useCreateQueueMember();
+    const { mutate: updateQueueMember, isLoading: updateLoading } = useUpdateQueueMember();
 
     useEffect(() => {
         if (modalOpen) {
@@ -26,19 +25,30 @@ const QueueMemberModal = ({ modalOpen, onCancel, onSubmit, initialValues }) => {
             const values = await form.validateFields();
 
             if (initialValues) {
-                // Edit mode — delegate to parent as before
-                onSubmit?.(values);
-                form.resetFields();
+                updateQueueMember(
+                    { id: initialValues.reference_id, data: values },
+                    {
+                        onSuccess: () => {
+                            message.success("Member updated successfully");
+                            form.resetFields();
+                            onSuccess?.();
+                            onCancel?.();
+                        },
+                        onError: (err) => message.error(err?.message || "Update failed"),
+                    }
+                );
             } else {
-                // Create mode — call the API directly
                 createQueueMember(values, {
                     onSuccess: () => {
+                        message.success("Member added successfully");
                         form.resetFields();
+                        onSuccess?.();
                         onCancel?.();
                     },
+                    onError: (err) => message.error(err?.message || "Create failed"),
                 });
             }
-        } catch (err) {
+        } catch {
             // validation failed
         }
     };
@@ -56,7 +66,7 @@ const QueueMemberModal = ({ modalOpen, onCancel, onSubmit, initialValues }) => {
             onCancel={handleCancel}
             okText="Save"
             cancelText="Cancel"
-            confirmLoading={createQueueMemberLoading}
+            confirmLoading={createLoading || updateLoading}
             destroyOnClose
         >
             <Form form={form} layout="vertical">
@@ -73,8 +83,7 @@ const QueueMemberModal = ({ modalOpen, onCancel, onSubmit, initialValues }) => {
                         optionFilterProp="label"
                         options={queueData?.data?.map((q) => ({
                             label: q.name ?? q.queue_number ?? q.id,
-                            value: q.reference_id
-                            ,
+                            value: q.reference_id,
                         }))}
                     />
                 </Form.Item>

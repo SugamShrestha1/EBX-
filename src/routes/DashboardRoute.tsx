@@ -5,6 +5,8 @@ import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { useThemeMode } from "../contexts/ThemeContext";
 import AgentRoute from "./AgentRoute";
 import QueueRoute from "./QueueRoute";
+import CampaignRoute from "./CampaignRoute";
+import AccessControlRoute from "./AccessControlRoute";
 
 
 export const DashboardRoute = () => {
@@ -20,12 +22,20 @@ export const DashboardRoute = () => {
             element: <UserRoutes />, // In React Router v6, we pass component wrappers to `element`, not `children`
         },
         {
-            path: "agent-management/*",
+            path: "agents-skills/*",
             element: <AgentRoute />,
         },
         {
             path: "queue-management/*",
             element: <QueueRoute />,
+        },
+        {
+            path: "campaigns*",
+            element: <CampaignRoute />,
+        },
+        {
+            path: "access-control/*",
+            element: <AccessControlRoute />,
         }
     ];
 

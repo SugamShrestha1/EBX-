@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, Typography, Row, Col, Space, Button, message, Tag, Switch } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import CommonTable from '../../components/common/CommonTable';
-import { useGetAgents, useDeleteAgent, useToggleAgentStatus } from '../../hooks/useAgentAction';
+import { useGetAgents, useDeleteAgent, useToggleAgentStatus, useBulkDelete } from '../../hooks/useAgentAction';
 import { useThemeMode } from '../../contexts/ThemeContext';
 import { useAgentStore } from './useAgentStore';
 import AgentFormModal from './AgentFormModal';
+import { useQueryClient } from '@tanstack/react-query';
+import { Columns } from './Columns';
 
 const { Title, Text } = Typography;
 
@@ -20,11 +22,17 @@ const Agents = () => {
     const { isLoading, refetch } = useGetAgents(queryParams);
     const { agents, removeAgent } = useAgentStore();
 
+    console.log(agents, "agents");
+
+
     const deleteAgent = useDeleteAgent();
+    const bulkDeleteAgent = useBulkDelete();
     const toggleAgentStatus = useToggleAgentStatus();
+    const queryClient = useQueryClient();
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingAgent, setEditingAgent] = useState(null);
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
     const openCreate = () => {
         setEditingAgent(null);
@@ -64,6 +72,49 @@ const Agents = () => {
         });
     };
 
+    const handleBulkDelete = () => {
+        const ids = selectedRowKeys as string[];
+
+        bulkDeleteAgent.mutate(ids, {
+            onSuccess: () => {
+                message.success("Selected agents deleted successfully");
+                setSelectedRowKeys([]);
+
+                // Update React Query cache for all variations of the "agents" query
+                queryClient.setQueriesData({ queryKey: ["agents"] }, (oldData: any) => {
+                    if (!oldData || !oldData.data) return oldData;
+
+                    return {
+                        ...oldData,
+                        data: oldData.data.filter(
+                            (agent: any) => !ids.includes(agent.reference_id)
+                        ),
+                    };
+                });
+
+                // Also update the Zustand store immediately for instant UI update
+                ids.forEach(id => removeAgent(id));
+            },
+            onError: (err: any) => {
+                message.error(err?.message || "Bulk delete failed");
+            },
+        });
+    };
+
+    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const bulkActions = (
+        <Button
+            danger
+            onClick={handleBulkDelete}
+            loading={bulkDeleteAgent.isPending}
+        >
+            Delete Selected
+        </Button>
+    );
+
     const handleToggleActive = (record) => {
         console.log(record, 'record')
         toggleAgentStatus.mutate(record.reference_id, {
@@ -74,63 +125,14 @@ const Agents = () => {
         });
     };
 
-    const columns = [
-        {
-            title: 'Agent Name',
-            dataIndex: 'user_full_name',
-            key: 'user_full_name',
-            render: (text, record) => (
-                <Space direction="vertical" size={0}>
-                    <Text strong>{text || 'Unknown'}</Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>{record.user_email}</Text>
-                </Space>
-            ),
-        },
-        {
-            title: 'Agent No.',
-            dataIndex: 'agent_number',
-            key: 'agent_number',
-            render: (text) => <Text code>{text}</Text>,
-        },
-        {
-            title: 'Extension',
-            dataIndex: 'extension_number',
-            key: 'extension_number',
-            render: (text) => text ? <Tag color="blue">{text}</Tag> : <Text type="secondary">—</Text>,
-        },
-        {
-            title: 'Priority',
-            dataIndex: 'priority',
-            key: 'priority',
-        },
-        {
-            title: 'Max Concurrent',
-            dataIndex: 'max_concurrent',
-            key: 'max_concurrent',
-        },
-        {
-            title: 'Status',
-            dataIndex: 'is_active',
-            key: 'is_active',
-            filters: [
-                { text: 'Active', value: true },
-                { text: 'Inactive', value: false },
-            ],
-            render: (isActive, record) => (
-                <Switch
-                    checked={isActive}
-                    onChange={() => handleToggleActive(record)}
-                    loading={toggleAgentStatus.isPending && toggleAgentStatus.variables === record.reference_id}
-                />
-            ),
-        },
-    ];
+    const columns = useMemo(() => Columns({ handleToggleActive, toggleAgentStatus }), [handleToggleActive, toggleAgentStatus.isPending, toggleAgentStatus.variables]);
 
     return (
-        <div className={`min-h-screen font-sans ${isDark ? 'bg-transparent text-slate-100' : 'bg-slate-50 text-slate-900'} p-6`}>
+        <div className={`h-full flex flex-col font-sans ${isDark ? 'bg-transparent text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
             <Card
+                className="flex-1 flex flex-col overflow-hidden"
                 style={{ borderRadius: 12 }}
-                styles={{ body: { padding: '20px 24px' } }}
+                styles={{ body: { padding: '20px 24px', flex: 1, overflow: 'auto' } }}
             >
                 <Row align="middle" justify="space-between" style={{ marginBottom: 16 }}>
                     <Col>
@@ -155,7 +157,10 @@ const Agents = () => {
                     onEdit={openEdit}
                     onDelete={(id) => handleDelete(id)}
                     onChange={handleTableChange}
-                    rowKey={(record) => record.id || record.reference_id || Math.random().toString()}
+                    selectedRowKeys={selectedRowKeys}
+                    onSelectChange={onSelectChange}
+                    bulkActions={bulkActions}
+                    rowKey={(record) => record.reference_id || record.id || Math.random().toString()}
                     emptyText="No agents found"
                 />
             </Card>

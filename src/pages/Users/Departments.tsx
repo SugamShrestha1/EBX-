@@ -13,6 +13,8 @@ import {
 
 import { defaultHours, fromPayload, DAYS } from "./components/BusinessHoursPopover";
 import DepartmentFormModal from "./components/DepartmentFormModal";
+import { Columns } from "./DepartmentsColumns";
+import { useMemo } from "react";
 
 import { useUsersStore } from "./useUserStore";
 import { useThemeMode } from "../../contexts/ThemeContext";
@@ -130,6 +132,8 @@ export default function DepartmentManager() {
         }
     };
 
+    const columns = useMemo(() => Columns(), []);
+
     return (
         <div className={`min-h-screen font-sans ${isDark ? 'bg-transparent text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
             {/* Header */}
@@ -152,28 +156,7 @@ export default function DepartmentManager() {
             {/* Content */}
             <main className="px-6 py-6">
                 <CommonTable
-                    columns={[
-                        {
-                            title: "Name",
-                            dataIndex: "name",
-                            key: "name",
-                            width: 200,
-                            render: (text) => <span className="font-medium">{text}</span>,
-                        },
-                        {
-                            title: "Code",
-                            dataIndex: "code",
-                            key: "code",
-                            width: 120,
-                            render: (text) => <Tag color="blue">{text}</Tag>,
-                        },
-                        {
-                            title: "Description",
-                            dataIndex: "description",
-                            key: "description",
-                            render: (text) => text || <span className="text-slate-400 italic">—</span>,
-                        },
-                    ]}
+                    columns={columns}
                     dataSource={departments}
                     loading={isLoadingDepartments}
                     onEdit={openEdit}

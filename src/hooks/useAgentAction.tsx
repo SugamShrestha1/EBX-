@@ -29,6 +29,7 @@ export const useGetAgents = (queryParams = {}) => {
 
         if (query.status === "success" && query.data) {
             const results = query?.data?.data;
+            console.log(query.data, "query data from agent hook")
             setAgents(results)
             // useAgentStore.getState().setAgents(results);
         }
@@ -60,14 +61,24 @@ export const useUpdateAgent = () => {
     });
 };
 
-//delete agent
 export const useDeleteAgent = () => {
     return useMutation({
         mutationFn: (id) => requestApi(`${endpoints.agent}${id}/`, {
             method: "DELETE",
+            headers: APIAuthHeaders2
         }),
     });
 };
+
+export const useBulkDelete = () => {
+    return useMutation({
+        mutationFn: (ids: string[]) => requestApi(`${endpoints.agent}bulk-delete/`, {
+            method: "POST",
+            body: JSON.stringify({ ids }),
+            headers: APIAuthHeaders2
+        }),
+    });
+}
 
 // 
 export const useToggleAgentStatus = () => {
@@ -87,3 +98,125 @@ export const useToggleAgentStatus = () => {
         }
     });
 };
+
+export const useGetAgentskills = () => {
+    return useQuery({
+        queryKey: ["agentskills"],
+        queryFn: () => requestApi(`${endpoints.skills}agent-skills/`),
+        refetchOnWindowFocus: false,
+    });
+};
+
+export const useCreateAgentskill = () => {
+    return useMutation({
+        mutationFn: (data) => requestApi(`${endpoints.skills}agent-skills/`, {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: APIAuthHeaders2
+        }),
+    });
+};
+
+export const useUpdateAgentskill = () => {
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string, data: any }) => requestApi(`${endpoints.skills}agent-skills/${id}/`, {
+            method: "PATCH",
+            body: JSON.stringify(data),
+            headers: APIAuthHeaders2
+        }),
+    });
+};
+
+export const useDeleteAgentskill = () => {
+    return useMutation({
+        mutationFn: (id) => requestApi(`${endpoints.skills}agent-skills/${id}/`, {
+            method: "DELETE",
+            headers: APIAuthHeaders2
+        }),
+    });
+};
+
+export const useToggleAgentskillStatus = () => {
+    return useMutation({
+        mutationFn: (id) => requestApi(`${endpoints.skills}agent-skills/${id}/toggle/`, {
+            method: "PATCH",
+            headers: APIAuthHeaders2,
+            body: JSON.stringify({ id })
+        }),
+    });
+};
+
+export const useBulkDeleteAgentSkill = () => {
+    return useMutation({
+        mutationFn: (ids: string[]) => requestApi(`${endpoints.skills}agent-skills/bulk-delete/`, {
+            method: "POST",
+            body: JSON.stringify({ ids }),
+            headers: APIAuthHeaders2
+        }),
+    });
+}
+export const useGetSkills = () => {
+    return useQuery({
+        queryKey: ["skills"],
+        queryFn: () => requestApi(endpoints.skills),
+        refetchOnWindowFocus: false,
+    });
+};
+
+export const useGetSimpleSkills = () => {
+    return useQuery({
+        queryKey: ["simpleskills"],
+        queryFn: () => requestApi(`${endpoints.skills}simple/`),
+        refetchOnWindowFocus: false,
+    });
+};
+
+
+export const useCreateSkill = () => {
+    return useMutation({
+        mutationFn: (data) => requestApi(endpoints.skills, {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: APIAuthHeaders2
+        }),
+    });
+};
+
+export const useUpdateSkill = () => {
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string, data: any }) => requestApi(`${endpoints.skills}${id}/`, {
+            method: "PATCH",
+            body: JSON.stringify(data),
+            headers: APIAuthHeaders2
+        }),
+    });
+};
+
+export const useDeleteSkill = () => {
+    return useMutation({
+        mutationFn: (id) => requestApi(`${endpoints.skills}${id}/`, {
+            method: "DELETE",
+            headers: APIAuthHeaders2
+        }),
+    });
+};
+
+export const useBulkDeleteSkill = () => {
+    return useMutation({
+        mutationFn: ({ ids }: { ids: string[] }) => requestApi(`${endpoints.skills}bulk-delete/`, {
+            method: "POST",
+            body: JSON.stringify({ ids }),
+            headers: APIAuthHeaders2
+        }),
+    });
+}
+
+export const useToggleSkillStatus = () => {
+    return useMutation({
+        mutationFn: (id) => requestApi(`${endpoints.skills}${id}/toggle/`, {
+            method: "PATCH",
+            headers: APIAuthHeaders2
+        }),
+    });
+};
+

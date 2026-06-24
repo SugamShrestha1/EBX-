@@ -92,11 +92,11 @@ export const NavigationItems = ({
         const item = {
           id: apiItem.slug,
           title: apiItem.name,
-          icon: apiItem.icon 
-            ? apiItem.icon.replace(/^lucide-/, '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('') 
+          icon: apiItem.icon
+            ? apiItem.icon.replace(/^lucide-/, '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
             : '',
           badge: apiItem.badge_text || null,
-          subItems: apiItem.children && apiItem.children.length > 0 
+          subItems: apiItem.children && apiItem.children.length > 0
             ? apiItem.children.map(child => ({ id: child.slug, title: child.name }))
             : null
         };
